@@ -6,7 +6,7 @@ TestData = []
 LearnData = []
 
 class Data:
-    def __init__(self,nomor,like,provokasi,komentar,emosi,hoax):
+    def __init__(self,nomor,like,provokasi,komentar,emosi,hoax=None):
         self.nomor = nomor
         self.like = like
         self.provokasi =provokasi
@@ -25,7 +25,8 @@ with open('Dataset/data.csv', 'r') as f:
 with open('Datatrain/data.csv', 'r') as g:
     reader2 = csv.reader(g)
     for row in reader2:
-        TestData.append(Data(row[0], row[1], row[2],row[3],row[4],-1))
+        TestData.append(Data(row[0], row[1], row[2],row[3],row[4]))
+
 
 def Test(Learn_Data, Test_Data):
     distance  = sqrt((int(Learn_Data.provokasi)-int(Test_Data.provokasi))**2 + (int(Learn_Data.like)-int(Test_Data.like))**2 + (int(Learn_Data.komentar)-int(Test_Data.komentar))**2 + (int(Learn_Data.emosi)-int(Test_Data.emosi))**2)
@@ -54,4 +55,10 @@ if __name__ == '__main__':
         for j in range(len(LearnData)):
             Result.append(Test(LearnData[j],TestData[i]))
         Result.sort(key=lambda ResultClass: ResultClass.distance,reverse=False)
-        print (GetClassification(K,Result))
+        TestData[i].hoax = GetClassification(K, Result)
+        print TestData[i].nomor,TestData[i].like,TestData[i].provokasi,TestData[i].komentar,TestData[i].emosi,TestData[i].hoax
+
+    with open('DataResult/result.csv', 'w') as r:
+        writer = csv.writer(r)
+        for _ in range(len(TestData)):
+            writer.writerow({TestData[i].nomor,TestData[i].like,TestData[i].provokasi,TestData[i].komentar,TestData[i].emosi,TestData[i].hoax})

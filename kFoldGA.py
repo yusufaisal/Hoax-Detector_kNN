@@ -1,10 +1,15 @@
 from __future__ import division
 from math import sqrt
-import csv
+from kFold import kFold as fungsi
 import random
+
 
 LearnData = []
 
+class F:
+    def __init__(self,fit,K):
+        self.fit = fit
+        self.K = K
 class Data:
     def __init__(self,nomor,like,provokasi,komentar,emosi,hoax):
         self.nomor = nomor
@@ -35,7 +40,7 @@ def GetClassification(K, Result):
     Count_Tidak = 0
     i=0
     while (i<K):
-        # print len(Result),i
+        # print len(DataResult),i
         if (Result[i].data.hoax == "1"):
             Count_Ya +=1
         else:
@@ -62,7 +67,7 @@ def fungsi(K):
                 if not find(j, index_test):
                     Result.append(Test(LearnData[j], LearnData[index_test[i]]))
             Result.sort(key=lambda ResultClass: ResultClass.distance, reverse=False)
-            # print Result[0].distance,Result[1].distance
+            # print DataResult[0].distance,DataResult[1].distance
             if LearnData[index_test[i]].hoax == GetClassification(K, Result):
                 count += 1
 
@@ -77,29 +82,25 @@ def fungsi(K):
 def genPopulasi(nPop, nKrom):
     pop = [[int(round(random.random())) for i in range(nKrom)] for j in range(nPop)]
     return pop
-
 def randomParent(nPop):
     return int(round(random.uniform(0,nPop)))
-
 def hitungFitness(krom):
     K= 0
     for i in range(len(krom)):
         if krom[i]==1:
             K +=2**i * krom[i]
 
-    fitness = fungsi(K)
-    print fitness,K
+    fit = fungsi(K)
+    fitness = F(fit,K)
     return fitness
 
 if  __name__ == '__main__':
-
     pCross = 0.8
     pMutasi =0.1
     nPop = 9
-    nGen = 7
+    nGen = 5
     nKrom = 10
     pop =genPopulasi(nPop,nKrom)
-    # print pop
 
     for i in range(nGen):
 
@@ -121,9 +122,7 @@ if  __name__ == '__main__':
                 #print anak1, anak2
                 for k in range(titik):
                     anak1[k],anak2[k] = anak2[k], anak1[k]
-                #print anak1,anak2
 
-            # mutasi
             rand = random.random()
             titik = int (round(random.uniform(0,nKrom-1)))
             if rand<=pMutasi:
@@ -143,21 +142,14 @@ if  __name__ == '__main__':
             anak.append(anak1)
             anak.append(anak2)
 
-        # print anak
         gab = pop + anak
         for j in range(len(gab)):
-            fitness.append(hitungFitness(gab[j]))
-
-        #print fitness
-        steadyState =  sorted(range(len(fitness)), key=lambda k:fitness[k], reverse=True)
-        #print steadyState
+            fit = hitungFitness(gab[j])
+            if (fitness==[] or fit.fit>fitness[0].fit ):
+                fitness.append(fit)
 
         pop = []
-        for j in range(nPop):
-            pop.append(gab[steadyState[j]])
+        pop = genPopulasi(nPop,nKrom)
         # print pop
 
-print "Akurasi:", fitness[steadyState[0]]
-# for i in range(nKrom):
-#     if pop[0][i] ==1:
-        # print barang[i],
+print "Akurasi,K:", fitness[0].fit,fitness[0].K
